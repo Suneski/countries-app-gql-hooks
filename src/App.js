@@ -1,26 +1,41 @@
 import React from 'react';
-import logo from './logo.svg';
+import gql from "graphql-tag";
+import { useQuery } from "@apollo/react-hooks";
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const QUERY = gql`
+query {
+  countries {
+    name
+    languages {
+      native
+    }
+  }
 }
+`
 
-export default App;
+export default function App() {
+  const { data, loading } = useQuery(QUERY);
+  return (
+    <React.Fragment>
+      <ul>
+        {loading && "LOADING"}
+        {data && data.countries && data.countries.map((country, index) => {
+          const nativeLanguageText = country.languages[0] && country.languages[0].native ?
+            `${country.name}'s native language is ${country.languages[0].native}`
+            :
+            `${country.name} ain't got no native language?`;
+
+          return (
+            <li key={index}>
+              {country.name}
+              <button onClick={() => alert(nativeLanguageText)}>
+                Language
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+    </React.Fragment>
+  )
+}
